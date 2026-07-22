@@ -8,6 +8,7 @@
 //! `wasm32-unknown-unknown`, so the caller measures with `performance.now()`.
 
 use mirante_core::profile_csv;
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 /// Runs on module instantiation.
@@ -27,7 +28,14 @@ pub fn start() {
 #[wasm_bindgen]
 pub fn profile(bytes: &[u8]) -> Result<JsValue, JsValue> {
     let profile = profile_csv(bytes).map_err(|e| JsValue::from_str(&e.to_string()))?;
-    serde_wasm_bindgen::to_value(&profile).map_err(|e| JsValue::from_str(&e.to_string()))
+    // `None` must become `null`, not `undefined`. The default drops the key
+    // entirely once the object is stringified, and the pandas service returns
+    // `null` — a difference that would show up as a phantom diff whenever the
+    // two profiles are compared field by field.
+    let serializer = serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true);
+    profile
+        .serialize(&serializer)
+        .map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// The crate version, so the UI can show what it is actually running.

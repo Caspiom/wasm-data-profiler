@@ -28,6 +28,22 @@ jobs:
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test -p mirante-core
 
+  # The comparison service is not deployed, but a baseline that does not run is
+  # a baseline nobody can reproduce.
+  check-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
+
   build:
     needs: check
     runs-on: ubuntu-latest

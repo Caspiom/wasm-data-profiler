@@ -7,3 +7,7 @@ node_modules/
 __pycache__/
 .ruff_cache/
 .pytest_cache/
+
+# Benchmark artefacts: regenerate with benchmarks/make_fixtures.py
+benchmarks/data/
+benchmarks/pkg/

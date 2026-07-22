@@ -63,6 +63,23 @@
         </div>
         <p class="footnote">Select a row to see its most frequent values.</p>
       </section>
+
+      <section id="compare" class="compare" hidden>
+        <h2 class="section-title">Compare with pandas</h2>
+        <p class="compare__warning">
+          This is the one thing on this page that uploads your file. It sends the CSV to
+          the address below, which profiles it with pandas so the two engines can be timed
+          against each other. Nothing else here leaves the tab.
+        </p>
+        <div class="compare__controls">
+          <label class="field">
+            <span>Comparison service</span>
+            <input id="api-url" type="url" value="http://localhost:8000" spellcheck="false" />
+          </label>
+          <button id="compare-button" type="button">Send file and compare</button>
+        </div>
+        <div id="compare-result" hidden></div>
+      </section>
     </main>
 
     <footer class="colophon">

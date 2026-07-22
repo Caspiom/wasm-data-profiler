@@ -164,6 +164,16 @@ fn empty_input_is_an_error_not_a_panic() {
 }
 
 #[test]
+fn comma_decimal_is_not_read_as_thousands() {
+    // Three-point-five, not thirty-five. Semicolons because with a comma
+    // delimiter the file would genuinely be two integer columns.
+    let p = profile(b"v;w\n3,5;a\n4,5;b\n");
+    assert_eq!(p.columns[0].column_type, ColumnType::Float);
+    assert_eq!(p.columns[0].decimal_style, Some(DecimalStyle::Comma));
+    assert_eq!(p.columns[0].numeric.as_ref().unwrap().max, Some(4.5));
+}
+
+#[test]
 fn byte_length_reports_the_original_input() {
     let csv = b"a\n1\n";
     assert_eq!(profile(csv).byte_length, csv.len());

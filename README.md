@@ -60,11 +60,68 @@ python3 -m http.server 8080
 
 ## Benchmark
 
-Not yet published. Numbers will appear here only once they come from real runs
-of a release build, reported as the median of at least five executions, with the
-machine, browser, versions and dataset size declared — and with the network time
-of the pandas comparison broken out separately, since Wasm wins partly by not
-having a network at all.
+### What was measured
+
+A 51.3 MB CSV: 1,500,000 rows across five columns — an integer, a float, a
+low-cardinality text column, a boolean and a date. Generated with a fixed seed,
+so the file is byte-identical anywhere:
+
+```bash
+python3 benchmarks/make_fixtures.py benchmarks/data
+
+wasm-pack build crates/wasm --target nodejs --release --out-dir ../../benchmarks/pkg
+node benchmarks/bench_wasm.mjs benchmarks/data/*.csv
+
+cd api && PYTHONPATH=. uv run python ../benchmarks/bench_pandas.py ../benchmarks/data/*.csv
+```
+
+Both engines produce the same profile. That is checked, not assumed: the
+comparison page in the browser diffs the two results field by field and reports
+disagreements before it reports timings.
+
+### Results
+
+Median of 5 runs after one warm-up. AMD Ryzen 7 6800H, 14 GB RAM, Linux
+7.0.11-cachyos. Rust 1.93.1 (`--release`, `opt-level = 3`, `lto = true`),
+Node 26.1.0, Python 3.12.8, pandas 3.0.3, pyarrow 25.0.0.
+
+| Engine | 51.3 MB / 1.5 M rows | 23 KB / 500 rows |
+| --- | --- | --- |
+| Rust → Wasm | **1,237 ms** | **2 ms** |
+| pandas | 14,298 ms | 42 ms |
+
+Roughly 11× on the large file. Two things that number does **not** include, both
+in Wasm's favour:
+
+- **The network.** Sending the 51 MB file to the pandas service and reading the
+  answer back took a further 167 ms — and that was over loopback, on the same
+  machine. A real deployment would be far worse. Wasm wins partly by having no
+  network at all, and that is a property of where the code runs, not of how
+  fast it is.
+- **Distinct counts.** The Rust engine caps its frequency table at 10,000
+  distinct values per column to bound memory, and reports the count as a floor
+  (`distinctIsExact: false`). pandas counts exactly, so on high-cardinality text
+  columns it is doing strictly more work.
+
+### Why the pandas side is written the way it is
+
+The baseline reproduces the engine's semantics — strict type inference, a
+per-column decimal convention, Brazilian null and boolean tokens — using
+vectorised pandas rather than a loop over rows. Letting `read_csv` infer dtypes
+natively would be considerably faster and would also compute something else
+entirely, which would make the comparison meaningless.
+
+`pyarrow` is a declared dependency for the same reason. Without it, pandas 3
+falls back to Python-backed strings and every `.str` operation runs one element
+at a time; the same file then takes 21,207 ms. Publishing that number would have
+credited Rust with 7 seconds that belong to a missing dependency.
+
+### Browser numbers
+
+The figures above are the release `.wasm` under Node's V8, which is not the same
+as measuring in a browser. The page times itself with `performance.now()` and
+shows the split; browser medians will be added here once they are collected the
+same way — five runs, median reported.
 
 ## License
 

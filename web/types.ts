@@ -84,3 +84,18 @@ export type WorkerResponse =
   | { type: "ready"; version: string }
   | { type: "result"; profile: Profile; timings: Timings; fileName: string; fileSize: number }
   | { type: "error"; message: string };
+
+/** Server-side timings from the pandas comparison service. */
+export interface ApiTimings {
+  parseMs: number;
+  aggregateMs: number;
+  /** Parsing plus aggregation — the figure comparable to the Wasm engine's. */
+  profileMs: number;
+}
+
+export interface ProfileResponse {
+  profile: Profile;
+  timings: ApiTimings;
+  engine: string;
+  versions: Record<string, string>;
+}

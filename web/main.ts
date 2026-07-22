@@ -3,6 +3,16 @@
  * hands it a File and draws what comes back.
  */
 
+import { setComparisonState } from "./compare.js";
+import {
+  element,
+  formatBytes,
+  formatInt,
+  formatMs,
+  formatNumber,
+  formatOptional,
+  must,
+} from "./dom.js";
 import type { ColumnProfile, Histogram, Profile, TextSummary, Timings, WorkerResponse } from "./types.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -15,11 +25,8 @@ const columnsSection = must<HTMLElement>("columns");
 const columnsBody = must<HTMLElement>("columns-body");
 const versionLabel = must<HTMLElement>("version");
 
-function must<T extends HTMLElement>(id: string): T {
-  const node = document.getElementById(id);
-  if (!node) throw new Error(`missing element #${id}`);
-  return node as T;
-}
+/** Kept so the comparison can send the same bytes to the pandas service. */
+let currentFile: File | null = null;
 
 // `import.meta.url` keeps this working under a subpath, which is where
 // GitHub Pages serves the project from.
@@ -95,9 +102,11 @@ for (const type of ["dragover", "drop"]) {
 function start(file: File): void {
   if (busy) return;
   busy = true;
+  currentFile = file;
   dropzone.classList.add("is-busy");
   summary.hidden = true;
   columnsSection.hidden = true;
+  setComparisonState(null);
   setStatus(`Profiling ${file.name} (${formatBytes(file.size)})…`);
   worker.postMessage({ type: "profile", file });
 }
@@ -117,6 +126,9 @@ function render(profile: Profile, timings: Timings, fileName: string, fileSize: 
   renderColumns(profile);
   summary.hidden = false;
   columnsSection.hidden = false;
+  if (currentFile) {
+    setComparisonState({ file: currentFile, profile, profileMs: timings.profileMs });
+  }
 }
 
 function renderSummary(profile: Profile, timings: Timings, fileSize: number): void {
@@ -307,46 +319,7 @@ function valuesPanel(text: TextSummary): HTMLElement {
 
 /* --------------------------------------------------------------- utilities */
 
-function element(tag: string, className?: string, text?: string): HTMLElement {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  // textContent, never innerHTML: column names and values come from the file.
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 function distinctLabel(text: TextSummary): string {
   // The counter caps out on high-cardinality columns; say so rather than lie.
   return text.distinctIsExact ? formatInt(text.distinct) : `≥ ${formatInt(text.distinct)}`;
-}
-
-const integerFormat = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
-const numberFormat = new Intl.NumberFormat(undefined, { maximumSignificantDigits: 6 });
-
-function formatInt(value: number): string {
-  return integerFormat.format(value);
-}
-
-function formatNumber(value: number): string {
-  if (!Number.isFinite(value)) return "—";
-  return numberFormat.format(value);
-}
-
-function formatOptional(value: number | null | undefined): string {
-  return value == null ? "—" : formatNumber(value);
-}
-
-function formatBytes(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB"];
-  let value = bytes;
-  let unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
-}
-
-function formatMs(ms: number): string {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${ms.toFixed(0)} ms`;
 }

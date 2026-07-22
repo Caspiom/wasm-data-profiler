@@ -14,5 +14,5 @@
     "noEmitOnError": true,
     "skipLibCheck": true
   },
-  "include": ["main.ts", "types.ts"]
+  "include": ["main.ts", "types.ts", "dom.ts", "compare.ts"]
 }
