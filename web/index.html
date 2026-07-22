@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mirante — CSV profiler</title>
+    <meta
+      name="description"
+      content="Profile a CSV in your browser. The file is parsed by Rust compiled to WebAssembly and never leaves your machine."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>📊</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>mirante</h1>
+      <p>
+        CSV profiling in Rust and WebAssembly.
+        <strong>Your file never leaves this tab.</strong>
+      </p>
+    </header>
+
+    <main>
+      <section
+        id="dropzone"
+        class="dropzone"
+        tabindex="0"
+        role="button"
+        aria-label="Choose a CSV file, or drop one here"
+      >
+        <p class="dropzone__title">Drop a CSV here</p>
+        <p class="dropzone__hint">or click to choose a file — nothing is uploaded</p>
+        <input id="file-input" type="file" accept=".csv,.tsv,.txt,text/csv" hidden />
+      </section>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="summary" class="summary" hidden></section>
+
+      <section id="columns" hidden>
+        <h2 class="section-title">Columns</h2>
+        <div class="table-scroll">
+          <table class="profile-table">
+            <thead>
+              <tr>
+                <th scope="col">Column</th>
+                <th scope="col">Type</th>
+                <th scope="col" class="num">Non-null</th>
+                <th scope="col" class="num">Nulls</th>
+                <th scope="col" class="num">Distinct</th>
+                <th scope="col" class="num">Min</th>
+                <th scope="col" class="num">Max</th>
+                <th scope="col" class="num">Mean</th>
+                <th scope="col" class="num">Std dev</th>
+                <th scope="col">Distribution</th>
+              </tr>
+            </thead>
+            <tbody id="columns-body"></tbody>
+          </table>
+        </div>
+        <p class="footnote">Select a row to see its most frequent values.</p>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <p>
+        Parsing runs in a Web Worker, so the tab stays responsive on large files.
+        <span id="version"></span>
+      </p>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

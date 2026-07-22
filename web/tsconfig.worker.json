@@ -1,0 +1,8 @@
+{
+  "//": "Worker thread: WebWorker lib instead of DOM.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022", "webworker"]
+  },
+  "include": ["worker.ts", "types.ts"]
+}

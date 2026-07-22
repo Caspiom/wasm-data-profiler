@@ -1,0 +1,14 @@
+{
+  "name": "mirante-web",
+  "private": true,
+  "type": "module",
+  "description": "Static front end. tsc emits ES modules the browser loads directly; there is no bundler.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.worker.json",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

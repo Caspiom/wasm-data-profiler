@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = ["crates/core", "crates/wasm"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/Caspiom/wasm-data-profiler"
+
+# Speed is what this project measures. Never use opt-level = "z" here.
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

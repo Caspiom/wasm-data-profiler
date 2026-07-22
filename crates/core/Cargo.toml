@@ -1,0 +1,11 @@
+[package]
+name = "mirante-core"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Pure CSV profiling engine: dialect sniffing, type inference, per-column aggregation."
+
+[dependencies]
+csv-core = "0.1.13"
+serde = { version = "1.0.229", features = ["derive"] }

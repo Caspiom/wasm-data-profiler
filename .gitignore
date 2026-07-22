@@ -1,0 +1,9 @@
+/target
+web/pkg/
+web/**/*.js
+!web/**/*.config.js
+node_modules/
+.venv/
+__pycache__/
+.ruff_cache/
+.pytest_cache/

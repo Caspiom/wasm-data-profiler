@@ -1,0 +1,18 @@
+{
+  "//": "Main thread. The worker has its own config because the DOM and WebWorker lib definitions conflict.",
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "verbatimModuleSyntax": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true
+  },
+  "include": ["main.ts", "types.ts"]
+}
